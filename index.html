@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch Ad & Earn</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f4f6f9; overflow: hidden; }
+
+        .top-bar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 75px;
+            background: #0052cc;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 99999;
+            padding: 5px 10px;
+        }
+
+        .timer-status { font-size: 16px; font-weight: 600; }
+        .timer-status span { color: #ffda79; font-size: 22px; font-weight: 700; }
+
+        .claim-btn {
+            background-color: #00b894;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .ad-frame-container {
+            margin-top: 75px;
+            width: 100vw;
+            height: calc(100vh - 75px);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div id="statusContainer" class="timer-status">
+        ⏳ অনুগ্রহ করে অপেক্ষা করুন: <span id="timer">10</span> সেকেন্ড
+    </div>
+    <button id="claimBtn" class="claim-btn" onclick="claimReward()">💰 Claim Reward</button>
+</div>
+
+<iframe id="adIframe" class="ad-frame-container" src="about:blank"></iframe>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCNTtvQJRleVCg1N2sP3vUt-B42-_ktAxg",
+        databaseURL: "https://referral-earning-1a642-default-rtdb.firebaseio.com",
+        projectId: "referral-earning-1a642"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    const adDirectUrl = "https://www.effectivecpmnetwork.com/bxbdnrr0x?key=3a602cf186d9e440699b4108dfae1525";
+    document.getElementById('adIframe').src = adDirectUrl;
+
+    let timeLeft = 10;
+    let adRewardAmount = 2.0;
+    let isTaskFinished = false;
+    let timerStarted = false;
+
+    database.ref('bot_settings').once('value').then((snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            if (data.ad_timer) timeLeft = parseInt(data.ad_timer);
+            if (data.ad_reward) adRewardAmount = parseFloat(data.ad_reward);
+        }
+        if (!timerStarted) startCountdown();
+    }).catch(() => {
+        if (!timerStarted) startCountdown();
+    });
+
+    setTimeout(() => {
+        if (!timerStarted) startCountdown();
+    }, 1000);
+
+    function startCountdown() {
+        timerStarted = true;
+        const timerDisplay = document.getElementById('timer');
+        timerDisplay.innerText = timeLeft;
+
+        const countdownInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft >= 0) {
+                timerDisplay.innerText = timeLeft;
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(countdownInterval);
+                isTaskFinished = true;
+                document.getElementById('statusContainer').style.display = 'none';
+                document.getElementById('claimBtn').style.display = 'inline-block';
+            }
+        }, 1000);
+    }
+
+    function claimReward() {
+        if (!isTaskFinished) return;
+
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id');
+
+        if (userId) {
+            database.ref('users/' + userId + '/balance').transaction((currentBalance) => {
+                return (currentBalance || 0) + adRewardAmount;
+            }).then(() => {
+                alert("🎉 অভিনন্দন! ৳" + adRewardAmount.toFixed(2) + " টাকা আপনার ব্যালেন্সে যোগ করা হয়েছে।");
+                tg.close();
+            }).catch((err) => {
+                alert("ব্যালেন্স আপডেট করতে সমস্যা হয়েছে: " + err.message);
+            });
+        } else {
+            alert("⚠️ ইউজার সনাক্ত করা যায়নি!");
+        }
+    }
+</script>
+
+</body>
+</html>
