@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ওয়েব ক্যামেরা অ্যাপ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="camera-container">
+        <!-- ক্যামেরা প্রিভিউ ভিডিও এলিমেন্ট -->
+        <video id="video" autoplay playsinline></video>
+        
+        <!-- ছবি তোলার পর দেখানোর জন্য ক্যানভাস (লুকানো থাকবে) -->
+        <canvas id="canvas" style="display:none;"></canvas>
+
+        <!-- কন্ট্রোল প্যানেল ও বাটন -->
+        <div class="controls">
+            <button id="snap" class="btn capture-btn">📸 ছবি তুলুন</button>
+            <button id="record" class="btn record-btn">🔴 ভিডিও শুরু</button>
+            <button id="stop" class="btn stop-btn" disabled>⏹️ ভিডিও থামান</button>
+        </div>
+    </div>
+
+    <!-- স্ট্যাটাস মেসেজ দেখানোর জন্য -->
+    <p id="status"></p>
+
+    <script src="script.js"></script>
+</body>
+</html>
