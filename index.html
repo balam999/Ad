@@ -3,148 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch Ad & Earn</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
+    <title>BT DOWNLOAD - Thumbnail Downloader</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-        body { background-color: #f4f6f9; overflow: hidden; }
-
-        .top-bar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 75px;
-            background: #0052cc;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 99999;
-            padding: 5px 10px;
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent; /* নীল বা বক্স হাইলাইট রিমুভ করার জন্য */
         }
-
-        .timer-status { font-size: 16px; font-weight: 600; }
-        .timer-status span { color: #ffda79; font-size: 22px; font-weight: 700; }
-
-        .claim-btn {
-            background-color: #00b894;
-            color: white;
-            border: none;
-            padding: 10px 28px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 20px;
-            cursor: pointer;
-            display: none;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            animation: pulse 1.2s infinite;
+        .app-container {
+            box-shadow: 0 25px 50px -12px rgba(109, 40, 217, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
         }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        .btn-effect {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
-
-        .ad-frame-container {
-            margin-top: 75px;
-            width: 100vw;
-            height: calc(100vh - 75px);
-            border: none;
+        .btn-effect:active {
+            transform: scale(0.97);
+            background-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        /* কাস্টম স্ক্রলবার */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a78bfa;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body>
+<body class="flex items-center justify-center min-h-screen p-0 sm:p-4">
 
-<div class="top-bar">
-    <div id="statusContainer" class="timer-status">
-        ⏳ অনুগ্রহ করে অপেক্ষা করুন: <span id="timer">10</span> সেকেন্ড
+    <!-- মোবাইল ফ্রেম কন্টেইনার (কোটলিন স্টাইল মডার্ন ইউআই) -->
+    <div class="app-container w-full max-w-md bg-white h-screen sm:h-[844px] sm:rounded-[40px] flex flex-col overflow-hidden relative border-0 sm:border-8 sm:border-purple-900">
+
+        <!-- অ্যাপ হেডার -->
+        <header class="bg-purple-700 text-white px-6 py-4 flex items-center justify-between shadow-lg z-10">
+            <div class="flex items-center space-x-3">
+                <!-- লোগো -->
+                <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md overflow-hidden p-1">
+                    <img src="https://i.ibb.co/N2FFfgxn/20260930-085622.png" alt="Logo" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide">BT DOWNLOAD</h1>
+                    <p class="text-xs text-purple-200">Thumbnail Downloader</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-white text-sm font-semibold shadow-inner">
+                BT
+            </div>
+        </header>
+
+        <!-- মূল বডি কন্টেন্ট -->
+        <main class="flex-1 overflow-y-auto p-5 bg-slate-50 space-y-5">
+
+            <!-- ইনপুট সেকশন -->
+            <div class="bg-white p-5 rounded-2xl shadow-xl border border-purple-100">
+                <label for="urlInput" class="block text-sm font-semibold text-purple-900 mb-2">ইউটিউব ভিডিও লিংক দিন:</label>
+                <div class="relative">
+                    <input type="text" id="urlInput" placeholder="https://www.youtube.com/watch?v=..." class="w-full px-4 py-3.5 pl-11 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-purple-600 focus:bg-white transition-all">
+                    <span class="absolute left-3.5 top-4 text-purple-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                    </span>
+                </div>
+                
+                <!-- ফেচ বাটন -->
+                <button onclick="fetchThumbnail()" class="btn-effect w-full mt-4 bg-purple-700 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-purple-200 flex items-center justify-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <span>থাম্বনেল খুঁজুন</span>
+                </button>
+            </div>
+
+            <!-- প্রিভিউ এবং কোয়ালিটি ভিত্তিক ডাউনলোড সেকশন -->
+            <div id="previewSection" class="hidden bg-white p-5 rounded-2xl shadow-xl border border-purple-100 space-y-4">
+                <h3 class="text-sm font-bold text-purple-900 flex items-center justify-between">
+                    <span>থাম্বনেল প্রিভিউ</span>
+                    <span class="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-medium">Ready</span>
+                </h3>
+                
+                <!-- থাম্বনেল ইমেজ প্রিভিউ বক্স -->
+                <div class="relative rounded-xl overflow-hidden shadow-md border border-slate-200">
+                    <img id="thumbnailImage" src="" alt="Thumbnail Preview" class="w-full h-44 object-cover">
+                </div>
+
+                <!-- ডাউনলোড অপশনসমূহ (720p এবং 1080p সহ ডিরেক্ট ডাউনলোড বাটন) -->
+                <div class="space-y-3 pt-1">
+                    
+                    <!-- 720p অপশন -->
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl border border-purple-100">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-purple-200 text-purple-800 flex items-center justify-center font-bold text-xs">
+                                720p
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-purple-900">HD Standard</h4>
+                                <p class="text-[10px] text-purple-600">ইউটিউব এইচডি থাম্বনেল</p>
+                            </div>
+                        </div>
+                        <button onclick="downloadImage('hq')" class="btn-effect bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-md flex items-center space-x-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>ডাউনলোড</span>
+                        </button>
+                    </div>
+
+                    <!-- 1080p অপশন -->
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-xl border border-purple-100">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 rounded-lg bg-purple-700 text-white flex items-center justify-center font-bold text-xs">
+                                1080
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-purple-900">Full HD (Max)</h4>
+                                <p class="text-[10px] text-purple-600">সর্বোচ্চ রেজোলিউশন</p>
+                            </div>
+                        </div>
+                        <button onclick="downloadImage('max')" class="btn-effect bg-purple-700 text-white px-4 py-2 rounded-lg text-xs font-semibold shadow-md flex items-center space-x-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            <span>ডাউনলোড</span>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- নির্দেশিকা কার্ড -->
+            <div class="bg-purple-50 border border-purple-100 p-4 rounded-2xl text-purple-900 text-xs space-y-1.5">
+                <p class="font-bold flex items-center space-x-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>ডাউনলোড পারমিশন:</span>
+                </p>
+                <p class="text-purple-700 leading-relaxed">ডাউনলোড বাটনে ক্লিক করার পর ক্রোম ব্রাউজার থেকে ফাইল সেভ করার পারমিশন চাইলে **Allow** বা **Download** দিলেই ফাইলটি সরাসরি **BT_DOWNLOAD.jpg** নামে আপনার ফোনে সেভ হয়ে যাবে।</p>
+            </div>
+
+        </main>
+
+        <!-- অ্যাপ ফুটার -->
+        <footer class="bg-white border-t border-slate-100 py-3 text-center text-xs text-purple-900 font-medium">
+            Powered by BT DOWNLOAD &copy; 2026
+        </footer>
+
     </div>
-    <button id="claimBtn" class="claim-btn" onclick="claimReward()">💰 Claim Reward</button>
-</div>
 
-<iframe id="adIframe" class="ad-frame-container" src="about:blank"></iframe>
+    <!-- জাভাস্ক্রিপ্ট লজিক -->
+    <script>
+        let currentVideoID = '';
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyCNTtvQJRleVCg1N2sP3vUt-B42-_ktAxg",
-        databaseURL: "https://referral-earning-1a642-default-rtdb.firebaseio.com",
-        projectId: "referral-earning-1a642"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-
-    const adDirectUrl = "https://www.effectivecpmnetwork.com/bxbdnrr0x?key=3a602cf186d9e440699b4108dfae1525";
-    document.getElementById('adIframe').src = adDirectUrl;
-
-    let timeLeft = 10;
-    let adRewardAmount = 2.0;
-    let isTaskFinished = false;
-    let timerStarted = false;
-
-    database.ref('bot_settings').once('value').then((snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            if (data.ad_timer) timeLeft = parseInt(data.ad_timer);
-            if (data.ad_reward) adRewardAmount = parseFloat(data.ad_reward);
+        function extractVideoID(url) {
+            let regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            let match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
         }
-        if (!timerStarted) startCountdown();
-    }).catch(() => {
-        if (!timerStarted) startCountdown();
-    });
 
-    setTimeout(() => {
-        if (!timerStarted) startCountdown();
-    }, 1000);
-
-    function startCountdown() {
-        timerStarted = true;
-        const timerDisplay = document.getElementById('timer');
-        timerDisplay.innerText = timeLeft;
-
-        const countdownInterval = setInterval(() => {
-            timeLeft--;
-            if (timeLeft >= 0) {
-                timerDisplay.innerText = timeLeft;
+        function fetchThumbnail() {
+            let url = document.getElementById('urlInput').value.trim();
+            currentVideoID = extractVideoID(url);
+            
+            if (!currentVideoID) {
+                alert('দয়া করে সঠিক একটি ইউটিউব লিংক দিন!');
+                return;
             }
 
-            if (timeLeft <= 0) {
-                clearInterval(countdownInterval);
-                isTaskFinished = true;
-                document.getElementById('statusContainer').style.display = 'none';
-                document.getElementById('claimBtn').style.display = 'inline-block';
-            }
-        }, 1000);
-    }
+            let previewUrl = `https://img.youtube.com/vi/${currentVideoID}/maxresdefault.jpg`;
+            let imgElement = document.getElementById('thumbnailImage');
+            imgElement.src = previewUrl;
+            
+            imgElement.onerror = function() {
+                imgElement.src = `https://img.youtube.com/vi/${currentVideoID}/hqdefault.jpg`;
+            };
 
-    function claimReward() {
-        if (!isTaskFinished) return;
-
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        
-        const urlParams = new URLSearchParams(window.location.search);
-        const userId = tg.initDataUnsafe?.user?.id || urlParams.get('user_id');
-
-        if (userId) {
-            database.ref('users/' + userId + '/balance').transaction((currentBalance) => {
-                return (currentBalance || 0) + adRewardAmount;
-            }).then(() => {
-                alert("🎉 অভিনন্দন! ৳" + adRewardAmount.toFixed(2) + " টাকা আপনার ব্যালেন্সে যোগ করা হয়েছে।");
-                tg.close();
-            }).catch((err) => {
-                alert("ব্যালেন্স আপডেট করতে সমস্যা হয়েছে: " + err.message);
-            });
-        } else {
-            alert("⚠️ ইউজার সনাক্ত করা যায়নি!");
+            document.getElementById('previewSection').classList.remove('hidden');
         }
-    }
-</script>
 
+        function downloadImage(quality) {
+            if (!currentVideoID) return;
+
+            let imageURL = `https://img.youtube.com/vi/${currentVideoID}/maxresdefault.jpg`;
+            if(quality === 'hq') {
+                imageURL = `https://img.youtube.com/vi/${currentVideoID}/hqdefault.jpg`;
+            }
+
+            // ক্রোম ব্রাউজার বা যেকোনো ব্রাউজারে ফাইল ডাউনলোডের পারমিশন ট্রিগার করার জন্য অ্যাংকর ট্যাগ অ্যাট্র্রিবিউট পদ্ধতি
+            let anchor = document.createElement('a');
+            anchor.href = imageURL;
+            anchor.target = '_blank';
+            anchor.download = 'BT_DOWNLOAD.jpg';
+            
+            // ব্রাউজার যাতে সিকিউরিটি পারমিশন পপআপ বা প্রম্পট দেখায় সেজন্য ডিরেক্ট ক্লিকের ব্যবস্থা
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+        }
+    </script>
 </body>
 </html>
